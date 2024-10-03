@@ -10,13 +10,13 @@ function Additem_page() {
   ];
 
   const [test, settest] = useState("2");
-  const d = [{ name: "a" }];
+  const data = [{ name: "a" }];
 
   const onFinish: FormProps["onFinish"] = (values) => {
     console.log("Success:", values);
     d.push(values);
     settest("2");
-    console.log(t)
+    console.log(test)
     console.log("Success:", d);
   };
   return (
@@ -55,7 +55,7 @@ function Additem_page() {
           </Form.Item>
         </div>
       </Form>
-      <Table columns={columns} dataSource={d} />
+      <Table columns={columns} dataSource={data} />
     </>
   );
 }
