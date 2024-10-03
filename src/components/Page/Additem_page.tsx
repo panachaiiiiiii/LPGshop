@@ -9,15 +9,15 @@ function Additem_page() {
     { title: "name", dataIndex: "name", key: "name" },
   ];
 
-  const [test, settest] = useState("2");
+  const [test, settest] = useState({ name: "a" });
   const data = [{ name: "a" }];
 
   const onFinish: FormProps["onFinish"] = (values) => {
     console.log("Success:", values);
-    d.push(values);
-    settest("2");
+    const update = {...test,name: "dw"}
+    settest(update)
     console.log(test)
-    console.log("Success:", d);
+    console.log("Success:", data);
   };
   return (
     <>
