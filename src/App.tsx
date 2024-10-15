@@ -1,13 +1,17 @@
-import { Button, TreeSelect, Space, Form, Input } from "antd";
-import { useState } from "react";
-import type { TreeSelectProps } from "antd";
-import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import HomePage from "./page/home";
+import SettingPage from "./page/setting_page";
+import AddItemPage from "./page/Additem_page";
+
 function App() {
   return (
-    <>
-      <p className="text-2xl">ขายสินค้า</p>
-      
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="setting" element={<SettingPage />} />
+        <Route path="add-item" element={<AddItemPage />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
