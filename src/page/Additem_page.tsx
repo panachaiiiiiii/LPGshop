@@ -3,6 +3,7 @@ import { Button, Form, Input, InputNumber, Space, Table } from "antd";
 import { useForm } from "antd/es/form/Form";
 import { useState } from "react";
 import Swal from "sweetalert2";
+
 interface Tp {
   key: number;
   name: string;
@@ -15,20 +16,20 @@ function Additem_page() {
   const [editForm] = useForm();
   const [forms] = useForm();
   const [tableData, setTableData] = useState<Tp[]>([]);
-  const [active, setactive] = useState<boolean>(false);
-  const [numkey, setnumkey] = useState<number>();
+  const [active, setActive] = useState<boolean>(false);
+  const [numkey, setNumKey] = useState<number | undefined>();
+
   const columns: TableProps["columns"] = [
     { title: "ชื่อ", dataIndex: "name", key: "name" },
     { title: "ต้นทุน", dataIndex: "cost", key: "cost" },
     { title: "ราคาขาย", dataIndex: "price", key: "price" },
-    { title: "จำนวนตงเหลือ", dataIndex: "number", key: "number" },
+    { title: "จำนวน", dataIndex: "number", key: "number" },
     {
       title: "รายละเอียด",
       key: "info",
       render: (_, record) => (
         <Space size="middle">
           <Button
-            id={record.key}
             onClick={() => {
               Swal.fire({
                 title: "Are you sure?",
@@ -48,29 +49,26 @@ function Additem_page() {
                     title: "Deleted!",
                     text: "Your file has been deleted.",
                     icon: "success",
-                  });
-                }
+                  });                }
               });
             }}
           >
-            Delete{record.key}
+            Delete {record.key}
           </Button>
 
           <Button
-            id={record.key}
             onClick={() => {
-              setactive(false);
-              setnumkey(record.key);
+              setActive(true);
+              setNumKey(record.key);
               editForm.setFieldsValue({
                 name: record.name,
                 price: record.price,
                 cost: record.cost,
                 number: record.number,
               });
-              setactive(true);
             }}
           >
-            Edit{record.key}
+            Edit {record.key}
           </Button>
         </Space>
       ),
@@ -83,7 +81,7 @@ function Additem_page() {
     setTableData([
       ...tableData,
       {
-        key: L_index == 0 ? 0 : tableData[L_index - 1].key + 1,
+        key: L_index === 0 ? 0 : tableData[L_index - 1].key + 1,
         name: values.name,
         cost: values.cost,
         price: values.price,
@@ -93,8 +91,16 @@ function Additem_page() {
   };
 
   const editFinish: FormProps["onFinish"] = (values) => {
-    editForm.resetFields();
-    console.log(values.key);
+    if (numkey !== undefined) {
+      setTableData((prevData) =>
+        prevData.map((item) =>
+          item.key === numkey ? { ...item, ...values } : item
+        )
+      );
+      editForm.resetFields();
+      setActive(false);
+      setNumKey(undefined);
+    }
   };
 
   return (
@@ -121,11 +127,7 @@ function Additem_page() {
         </div>
       </Form>
 
-      <Form
-        onFinish={editFinish}
-        form={editForm}
-        className={active == true ? "" : "hidden"}
-      >
+      <Form onFinish={editFinish} form={editForm} className={active ? "" : "hidden"}>
         <div className="md:flex md:justify-center space-x-4 md:mx-0 mx-4">
           <Form.Item label="ชื่อสินค้า" name="name">
             <Input />
