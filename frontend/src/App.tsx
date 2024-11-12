@@ -1,7 +1,6 @@
 import {
   AppstoreOutlined,
-  MailOutlined,
-  SettingOutlined,
+  MailOutlined
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Menu } from "antd";
@@ -20,12 +19,12 @@ const items: MenuItem[] = [
     icon: <MailOutlined />,
   },
   {
-    label: <a href="/add-item">ยอดรวม</a>,
-    key: "app",
+    label: <a href="/add-item">จัดการสินค้า</a>,
+    key: "add",
     icon: <AppstoreOutlined />,
   },
   {
-    label: <a href="/add-item">คลังสินค้า</a>,
+    label: <a href="/s">คลังสินค้า</a>,
     key: "app",
     icon: <AppstoreOutlined />,
   },

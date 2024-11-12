@@ -1,8 +1,8 @@
-const { request } = require("express");
+const express = require("express");
 const router = express.Router()
-const express = request
 
-router.get('/regsiter',(req,res)=>{
+
+router.get('/register',(req,res)=>{
     res.send('ssss')
 })
 module.exports = router

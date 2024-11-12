@@ -49,7 +49,8 @@ function Additem_page() {
                     title: "Deleted!",
                     text: "Your file has been deleted.",
                     icon: "success",
-                  });                }
+                  });
+                }
               });
             }}
           >
@@ -105,18 +106,23 @@ function Additem_page() {
 
   return (
     <>
-      <Form onFinish={onFinish} clearOnDestroy={true} form={forms}>
-        <div className="md:flex md:justify-center space-x-4 md:mx-0 mx-4">
-          <Form.Item label="ชื่อสินค้า" name="name">
+      <Form
+        onFinish={onFinish}
+        clearOnDestroy={true}
+        form={forms}
+        className={!active ? "" : "hidden"}
+      >
+        <div className="md:flex md:justify-center md:space-x-4 md:mx-0 mx-4 ">
+          <Form.Item label="ชื่อสินค้า" name="name"rules={[{ required: true, message: "กรอกชื่อสินค้า" }]}>
             <Input />
           </Form.Item>
-          <Form.Item label="ต้นทุน" name="cost">
+          <Form.Item label="ต้นทุน" name="cost"rules={[{ required: true, message: "กรอกต้นทุนสินค้า" }]} >
             <InputNumber min={0} className="w-full" />
           </Form.Item>
-          <Form.Item label="ราคาขาย" name="price">
+          <Form.Item label="ราคาขาย" name="price"rules={[{ required: true, message: "กรอกราคาขายสินค้า" }]} >
             <InputNumber min={0} className="w-full" />
           </Form.Item>
-          <Form.Item label="จำนวน" name="number">
+          <Form.Item label="จำนวน" name="number" rules={[{ required: true, message: "กรอกจำนวนสินค้า" }]}>
             <InputNumber min={0} className="w-full" />
           </Form.Item>
           <Form.Item className="justify-end">
@@ -127,18 +133,38 @@ function Additem_page() {
         </div>
       </Form>
 
-      <Form onFinish={editFinish} form={editForm} className={active ? "" : "hidden"}>
-        <div className="md:flex md:justify-center space-x-4 md:mx-0 mx-4">
-          <Form.Item label="ชื่อสินค้า" name="name">
+      <Form
+        onFinish={editFinish}
+        form={editForm}
+        className={active ? "" : "hidden"}
+      >
+        <div className="md:flex md:justify-center md:space-x-4 md:mx-0 mx-4">
+          <Form.Item
+            label="ชื่อสินค้า"
+            name="name"
+            
+          >
             <Input />
           </Form.Item>
-          <Form.Item label="ต้นทุน" name="cost">
+          <Form.Item
+            label="ต้นทุน"
+            name="cost"
+            
+          >
             <InputNumber min={0} className="w-full" />
           </Form.Item>
-          <Form.Item label="ราคาขาย" name="price">
+          <Form.Item
+            label="ราคาขาย"
+            name="price"
+            
+          >
             <InputNumber min={0} className="w-full" />
           </Form.Item>
-          <Form.Item label="จำนวน" name="number">
+          <Form.Item
+            label="จำนวน"
+            name="number"
+            
+          >
             <InputNumber min={0} className="w-full" />
           </Form.Item>
           <Form.Item className="justify-end">
@@ -148,8 +174,9 @@ function Additem_page() {
           </Form.Item>
         </div>
       </Form>
-
-      <Table columns={columns} dataSource={tableData} />
+      <div className="md:mx-auto container">
+        <Table columns={columns} dataSource={tableData} />
+      </div>
     </>
   );
 }
