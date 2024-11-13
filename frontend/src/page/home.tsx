@@ -1,7 +1,7 @@
 import type { FormProps, TableProps } from "antd";
 import { Button, Form, InputNumber, Select, Space, Table } from "antd";
 import { useForm } from "antd/es/form/Form";
-import Item from "antd/es/list/Item";
+
 import { useState } from "react";
 import Swal from "sweetalert2";
 
@@ -9,24 +9,24 @@ interface Tp {
   key: number;
   name: string;
   price: number;
-  number: number;
+  quantity: number;
 }
 interface MyItem {
   value: string;
   label: string;
   price: number;
-  number: number;
+  quantity: number;
 }
 const iitem: MyItem[] = [
-  { value: "lucy", label: "Lucy", price: 2, number: 24 },
-  { value: "lucy2", label: "Lucy2", price: 2, number: 24 },
-  { value: "lucy3", label: "Lucy3", price: 2, number: 24 },
+  { value: "lucy", label: "Lucy", price: 2, quantity: 24 },
+  { value: "lucy2", label: "Lucy2", price: 2, quantity: 24 },
+  { value: "lucy3", label: "Lucy3", price: 2, quantity: 24 },
 ];
 
 function HomePage() {
   const [formss] = useForm();
   const [tableData, setTableData] = useState<Tp[]>([]);
-  const [total, settotal] = useState<number>();
+
 
   const onFinish: FormProps["onFinish"] = (values) => {
     const itemfinded = iitem.filter((iitem) => iitem.value === values.value);
@@ -37,7 +37,7 @@ function HomePage() {
         key: L_index === 0 ? 0 : tableData[L_index - 1].key + 1,
         name: itemfinded[0].value,
         price: itemfinded[0].price,
-        number: values.number,
+        quantity: values.number,
       },
     ]);
     formss.resetFields();
@@ -45,7 +45,7 @@ function HomePage() {
   const columns: TableProps["columns"] = [
     { title: "name", dataIndex: "name", key: "name" },
     { title: "price", dataIndex: "price", key: "price" },
-    { title: "number", dataIndex: "number", key: "number" },
+    { title: "quantity", dataIndex: "quantity", key: "quantity" },
     {
       title: "รายละเอียด",
       key: "info",
@@ -64,7 +64,7 @@ function HomePage() {
                 confirmButtonText: "Yes, delete it!",
               }).then((result) => {
                 if (result.isConfirmed) {
-                  let new_data = tableData.filter(
+                  const new_data = tableData.filter(
                     (data) => data.key !== record.key
                   );
                   setTableData(new_data);
@@ -121,10 +121,7 @@ function HomePage() {
       <div className="px-3 sm:px-6 md:mx-auto container my-4 justify-end flex space-x-6">
         <p>
           รวมทั้งหมด{" "}
-          {tableData.reduce(
-            (totals, acc) => totals + acc.price * acc.number,
-            0
-          )}
+          {tableData.reduce((totals, acc) => totals + acc.price * acc.quantity,0)}
         </p>
         <Button disabled={tableData.length < 1} type="primary">
           ยืนยันการซื้อสินค้า

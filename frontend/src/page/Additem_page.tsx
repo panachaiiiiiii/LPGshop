@@ -9,7 +9,7 @@ interface Tp {
   name: string;
   cost: number;
   price: number;
-  number: number;
+  quantity: number;
 }
 
 function Additem_page() {
@@ -41,7 +41,7 @@ function Additem_page() {
                 confirmButtonText: "Yes, delete it!",
               }).then((result) => {
                 if (result.isConfirmed) {
-                  let new_data = tableData.filter(
+                  const new_data = tableData.filter(
                     (data) => data.key !== record.key
                   );
                   setTableData(new_data);
@@ -86,7 +86,7 @@ function Additem_page() {
         name: values.name,
         cost: values.cost,
         price: values.price,
-        number: values.number,
+        quantity: values.number,
       },
     ]);
   };

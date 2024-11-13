@@ -1,14 +1,10 @@
-import {
-  AppstoreOutlined,
-  MailOutlined
-} from "@ant-design/icons";
+import { AppstoreOutlined, MailOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Menu } from "antd";
 import { useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import AddItemPage from "./page/Additem_page";
 import HomePage from "./page/home";
-import SettingPage from "./page/setting_page";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -28,7 +24,6 @@ const items: MenuItem[] = [
     key: "app",
     icon: <AppstoreOutlined />,
   },
-  
 ];
 function App() {
   const [current, setCurrent] = useState("mail");
@@ -48,7 +43,6 @@ function App() {
       />
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="setting" element={<SettingPage />} />
         <Route path="add-item" element={<AddItemPage />} />
       </Routes>
     </BrowserRouter>
