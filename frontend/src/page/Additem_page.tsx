@@ -1,11 +1,13 @@
 import type { FormProps, TableProps } from "antd";
 import { Button, Form, Input, InputNumber, Space, Table } from "antd";
 import { useForm } from "antd/es/form/Form";
-import { useState } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 
 interface Tp {
-  key: number;
+  id: number;
+  barcode: string;
   name: string;
   cost: number;
   price: number;
@@ -13,17 +15,39 @@ interface Tp {
 }
 
 function Additem_page() {
+  const [data, setdata] = useState<Tp[]>([]);
   const [editForm] = useForm();
   const [forms] = useForm();
-  const [tableData, setTableData] = useState<Tp[]>([]);
   const [active, setActive] = useState<boolean>(false);
   const [numkey, setNumKey] = useState<number | undefined>();
-
+  const fetchData = () => {
+    axios
+      .get("http://localhost:5001/api/showitem-admin")
+      .then((res) => {
+        setdata(
+          res.data.map((result: Tp) => ({
+            id: result.id,
+            barcode: result.barcode,
+            name: result.name,
+            cost: result.cost,
+            price: result.price,
+            quantity: result.quantity,
+          }))
+        );
+      })
+      .catch((err) => {
+        console.log("Error : ", err);
+      });
+  };
+  useEffect(() => {
+    fetchData();
+  }, []);
   const columns: TableProps["columns"] = [
+    { title: "รหัสสินค้า", dataIndex: "barcode", key: "barcode" },
     { title: "ชื่อ", dataIndex: "name", key: "name" },
     { title: "ต้นทุน", dataIndex: "cost", key: "cost" },
     { title: "ราคาขาย", dataIndex: "price", key: "price" },
-    { title: "จำนวน", dataIndex: "number", key: "number" },
+    { title: "จำนวน", dataIndex: "quantity", key: "quantity" },
     {
       title: "รายละเอียด",
       key: "info",
@@ -41,10 +65,13 @@ function Additem_page() {
                 confirmButtonText: "Yes, delete it!",
               }).then((result) => {
                 if (result.isConfirmed) {
-                  const new_data = tableData.filter(
-                    (data) => data.key !== record.key
-                  );
-                  setTableData(new_data);
+                  axios
+                    .delete("http://localhost:5001/api/remove/" + record.id)
+                    .then((res) => {
+                      console.log("Response:", res.data.message);
+                      fetchData();
+                    });
+
                   Swal.fire({
                     title: "Deleted!",
                     text: "Your file has been deleted.",
@@ -77,25 +104,24 @@ function Additem_page() {
   ];
 
   const onFinish: FormProps["onFinish"] = (values) => {
-    const L_index = tableData.length;
+    axios
+      .post("http://localhost:5001/api/createproduct", values)
+      .then((res) => {
+        console.log("Response:", res.data);
+        fetchData();
+      })
+      .catch((err) => {
+        console.log("Error : ", err);
+      });
+    // setdata([...data, values]);
     forms.resetFields();
-    setTableData([
-      ...tableData,
-      {
-        key: L_index === 0 ? 0 : tableData[L_index - 1].key + 1,
-        name: values.name,
-        cost: values.cost,
-        price: values.price,
-        quantity: values.number,
-      },
-    ]);
   };
 
   const editFinish: FormProps["onFinish"] = (values) => {
     if (numkey !== undefined) {
-      setTableData((prevData) =>
+      setdata((prevData) =>
         prevData.map((item) =>
-          item.key === numkey ? { ...item, ...values } : item
+          item.id === numkey ? { ...item, ...values } : item
         )
       );
       editForm.resetFields();
@@ -113,16 +139,32 @@ function Additem_page() {
         className={!active ? "" : "hidden"}
       >
         <div className="md:flex md:justify-center md:space-x-4 md:mx-0 mx-4 ">
-          <Form.Item label="ชื่อสินค้า" name="name"rules={[{ required: true, message: "กรอกชื่อสินค้า" }]}>
+          <Form.Item
+            label="ชื่อสินค้า"
+            name="name"
+            rules={[{ required: true, message: "กรอกชื่อสินค้า" }]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item label="ต้นทุน" name="cost"rules={[{ required: true, message: "กรอกต้นทุนสินค้า" }]} >
+          <Form.Item
+            label="ต้นทุน"
+            name="cost"
+            rules={[{ required: true, message: "กรอกต้นทุนสินค้า" }]}
+          >
             <InputNumber min={0} className="w-full" />
           </Form.Item>
-          <Form.Item label="ราคาขาย" name="price"rules={[{ required: true, message: "กรอกราคาขายสินค้า" }]} >
+          <Form.Item
+            label="ราคาขาย"
+            name="price"
+            rules={[{ required: true, message: "กรอกราคาขายสินค้า" }]}
+          >
             <InputNumber min={0} className="w-full" />
           </Form.Item>
-          <Form.Item label="จำนวน" name="number" rules={[{ required: true, message: "กรอกจำนวนสินค้า" }]}>
+          <Form.Item
+            label="จำนวน"
+            name="quantity"
+            rules={[{ required: true, message: "กรอกจำนวนสินค้า" }]}
+          >
             <InputNumber min={0} className="w-full" />
           </Form.Item>
           <Form.Item className="justify-end">
@@ -139,32 +181,16 @@ function Additem_page() {
         className={active ? "" : "hidden"}
       >
         <div className="md:flex md:justify-center md:space-x-4 md:mx-0 mx-4">
-          <Form.Item
-            label="ชื่อสินค้า"
-            name="name"
-            
-          >
+          <Form.Item label="ชื่อสินค้า" name="name">
             <Input />
           </Form.Item>
-          <Form.Item
-            label="ต้นทุน"
-            name="cost"
-            
-          >
+          <Form.Item label="ต้นทุน" name="cost">
             <InputNumber min={0} className="w-full" />
           </Form.Item>
-          <Form.Item
-            label="ราคาขาย"
-            name="price"
-            
-          >
+          <Form.Item label="ราคาขาย" name="price">
             <InputNumber min={0} className="w-full" />
           </Form.Item>
-          <Form.Item
-            label="จำนวน"
-            name="number"
-            
-          >
+          <Form.Item label="จำนวน" name="quantity">
             <InputNumber min={0} className="w-full" />
           </Form.Item>
           <Form.Item className="justify-end">
@@ -175,7 +201,7 @@ function Additem_page() {
         </div>
       </Form>
       <div className="md:mx-auto container">
-        <Table columns={columns} dataSource={tableData} />
+        <Table columns={columns} dataSource={data} />
       </div>
     </>
   );

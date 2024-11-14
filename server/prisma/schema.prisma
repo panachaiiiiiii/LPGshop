@@ -38,6 +38,5 @@ model ProductOnOrder {
   productId Int
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId   Int
-  price     Float
   count     Int
 }
