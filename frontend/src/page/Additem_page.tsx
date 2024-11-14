@@ -81,22 +81,22 @@ function Additem_page() {
               });
             }}
           >
-            Delete {record.key}
+            Delete {record.id}
           </Button>
 
           <Button
             onClick={() => {
               setActive(true);
-              setNumKey(record.key);
+              setNumKey(record.id);
               editForm.setFieldsValue({
                 name: record.name,
                 price: record.price,
                 cost: record.cost,
-                number: record.number,
+                quantity: record.quantity,
               });
             }}
           >
-            Edit {record.key}
+            Edit {record.id}
           </Button>
         </Space>
       ),
@@ -119,11 +119,15 @@ function Additem_page() {
 
   const editFinish: FormProps["onFinish"] = (values) => {
     if (numkey !== undefined) {
-      setdata((prevData) =>
-        prevData.map((item) =>
-          item.id === numkey ? { ...item, ...values } : item
-        )
-      );
+      axios
+      .put("http://localhost:5001/api/update-product/"+numkey, values)
+      .then((res) => {
+        console.log("Response:", res.data);
+        fetchData();
+      })
+      .catch((err) => {
+        console.log("Error : ", err);
+      });
       editForm.resetFields();
       setActive(false);
       setNumKey(undefined);

@@ -99,10 +99,21 @@ exports.remove = async (req, res) => {
   }
 };
 
-exports.edit = async (req, res) => {
+exports.updateproduct = async (req, res) => {
   try {
+    await prisma.product.update({
+      where: {
+        id: Number(req.params.id),
+      },
+      data: {
+        name: req.body.name,
+        price: req.body.price,
+        cost: req.body.cost,
+        quantity: req.body.quantity,
+      },
+    });
     console.log(req.params.id);
-    res.send("hi this from remove in controller");
+    res.send("Edited");
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "server error" });

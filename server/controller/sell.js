@@ -2,6 +2,8 @@ const prisma = require("../config/prisma");
 
 exports.sellitem = async (req, res) => {
   try {
+    const products = req.body.products;
+
     // สร้าง order ใหม่
     const newOrder = await prisma.order.create({
       data: {
@@ -9,26 +11,18 @@ exports.sellitem = async (req, res) => {
         total: req.body.total,
       },
     });
+    let newproduct = products.map((w) => ({ ...w, orderId: newOrder.id }));
 
-    // ตรวจสอบว่า products มีข้อมูลหรือไม่
-    const products = req.body.products;
-    if (!Array.isArray(products) || products.length === 0) {
-      return res.status(400).json({ message: "Products are required" });
-    }
+    // // ตรวจสอบว่า products มีข้อมูลหรือไม่
 
-    // เพิ่ม orderId ลงในแต่ละ product
-    const newProducts = products.map((result) => ({
-      ...result,
-      orderId: newOrder.id, // เพิ่ม orderId จาก newOrder ที่สร้าง
-    }));
+    // // เพิ่ม orderId ลงในแต่ละ product
 
-    // ใช้ createMany เพื่อเพิ่มข้อมูลสินค้าหลายรายการ
-    await prisma.productOnOrder.createMany({
-      data: newProducts,
+    const newOrdersss = await prisma.productOnOrder.createMany({
+      data: newproduct,
     });
 
     // ส่ง ID ของ order กลับไปยัง client
-    res.status(201).json({ id: newOrder.id });
+    res.status(201).json("sell in ordering");
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Server error" });
