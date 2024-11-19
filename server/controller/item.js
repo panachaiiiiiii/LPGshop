@@ -9,7 +9,7 @@ function formatDate(date) {
 
 exports.showitem = async (req, res) => {
   try {
-    const item = await prisma.product.findMany({
+    await prisma.product.findMany({
       select: {
         id: true,
         barcode: true,
@@ -19,9 +19,7 @@ exports.showitem = async (req, res) => {
         quantity: true,
       },
     });
-    console.log(item);
-
-    res.send(item);
+    res.status(200).json({ message: "Success" });
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "server error" });

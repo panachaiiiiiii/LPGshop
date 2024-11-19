@@ -5,6 +5,7 @@ import { useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import AddItemPage from "./page/Additem_page";
 import HomePage from "./page/home";
+import AdminLayout from "./layout/adminlayout";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -42,7 +43,16 @@ function App() {
         className="mb-10"
       />
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route
+          path="/"
+          element={
+            <AdminLayout>
+              <HomePage />
+            </AdminLayout>
+          }
+        />
+      </Routes>
+      <Routes>
         <Route path="add-item" element={<AddItemPage />} />
       </Routes>
     </BrowserRouter>
