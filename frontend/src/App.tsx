@@ -1,11 +1,11 @@
 import { AppstoreOutlined, MailOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
-import { Menu } from "antd";
-import { useState } from "react";
+import { ConfigProvider, Menu } from "antd";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import AddItemPage from "./page/Additem_page";
 import HomePage from "./page/home";
-import AdminLayout from "./layout/adminlayout";
+import { Theme } from "./configs/theme";
+import LayoutSelector from "./layout/layout";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -27,35 +27,37 @@ const items: MenuItem[] = [
   },
 ];
 function App() {
-  const [current, setCurrent] = useState("mail");
-
-  const onClick: MenuProps["onClick"] = (e) => {
-    console.log("click ", e);
-    setCurrent(e.key);
-  };
   return (
-    <BrowserRouter>
-      <Menu
-        onClick={onClick}
-        selectedKeys={[current]}
+    <ConfigProvider theme={Theme}>
+      <BrowserRouter>
+        {/* <Menu
+
         mode="horizontal"
         items={items}
         className="mb-10"
-      />
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <AdminLayout>
-              <HomePage />
-            </AdminLayout>
-          }
-        />
-      </Routes>
-      <Routes>
-        <Route path="add-item" element={<AddItemPage />} />
-      </Routes>
-    </BrowserRouter>
+      /> */}
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <LayoutSelector>
+                <HomePage />
+              </LayoutSelector>
+            }
+          />
+        </Routes>
+        <Routes>
+          <Route
+            path="add-item"
+            element={
+              <LayoutSelector>
+                <AddItemPage />
+              </LayoutSelector>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
+    </ConfigProvider>
   );
 }
 

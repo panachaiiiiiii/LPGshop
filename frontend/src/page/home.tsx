@@ -1,11 +1,5 @@
-
 function HomePage() {
-
-  return (
-    <>
-    
-    </>
-  );
+  return <>dwddwwd</>;
 }
 
 export default HomePage;
