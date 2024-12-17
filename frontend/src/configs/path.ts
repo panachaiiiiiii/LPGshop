@@ -10,6 +10,8 @@ export const Paths = {
   const api= "http://localhost:5001/api";
   
   export const APIPaths={
+    PostseeOrder: api+"/GetOrder",
+    PostDetailOrder: api+"/GetDetailOrder",
     GetAllItems : api+"/showitem",
     GetAllItemsAdmin: api+"/showitem-admin",
     DELETEItems:api+"/remove/",

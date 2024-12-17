@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const prisma = require("../config/prisma");
+
 exports.OrderProduct = async (req, res) => {
   try {
     //start token
@@ -15,7 +16,7 @@ exports.OrderProduct = async (req, res) => {
       Iduser = decoded.id;
     });
     //End token
-    const {payby} = req.body
+    const { payby } = req.body;
     if (!Iduser) {
       return res.status(401).send("Invalid or expired token");
     }
@@ -84,11 +85,48 @@ exports.getorder = async (req, res) => {
     if (myuser.role != 2) {
       return res.status(400).send("You do not have access rights.");
     }
-    const data = await prisma.order.findMany({
-      where: { createdAt: { gte: new Date("2024-11") } },
+    const { gte, le } = req.body;
+
+    console.log(gte, "and le : " + le);
+    const dataorder = await prisma.order.findMany({
+      where: { createdAt: { gte: gte, lt: le } },
+      include: {
+        products: true,
+        Users: true,
+      },
     });
 
-    res.send(data);
+    res.send(dataorder);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.getdetailorder = async (req, res) => {
+  try {
+    let Iduser = 0;
+
+    const token = req.headers["authorization"]?.split(" ")[1]; // ดึง token จาก "Authorization: Bearer <token>"
+    if (!token) {
+      return res.status(403).send("Token is required");
+    }
+    await jwt.verify(token, process.env.SECRET, (err, decoded) => {
+      if (err) {
+        return res.status(401).send("Invalid or expired token");
+      }
+      Iduser = decoded.id;
+    });
+    const myuser = await prisma.users.findFirst({ where: { id: Iduser } });
+    if (myuser.role != 2) {
+      return res.status(400).send("You do not have access rights.");
+    }
+    const { Orderid } = req.body;
+
+    const dataorder = await prisma.productOnOrder.findMany({
+      where: { orderId: Orderid },
+    });
+    res.send(dataorder);
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Server error" });

@@ -20,13 +20,14 @@ export const ClearSomeToken = (name: string) => {
 export const convertToThaiTime = (utcTime: string): string => {
   const date = new Date(utcTime);
   const options: Intl.DateTimeFormatOptions = {
-    timeZone: "Asia/Bangkok",
-    year: "numeric",
-    month: "2-digit",
     day: "2-digit",
-    // hour: '2-digit',
-    // minute: '2-digit',
-    // second: '2-digit',
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Asia/Bangkok", // ใช้เขตเวลาไทย (UTC+7)
   };
   return date.toLocaleString("th-TH", options);
 };
+
