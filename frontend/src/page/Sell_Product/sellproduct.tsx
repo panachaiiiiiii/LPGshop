@@ -1,172 +1,161 @@
 import type { FormProps, TableProps } from "antd";
-import { Button, Form, InputNumber, Select, Space, Table } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  InputNumber,
+  List,
+  Modal,
+  notification,
+  Popconfirm,
+  Radio,
+  Space,
+  Table,
+} from "antd";
 import { useForm } from "antd/es/form/Form";
-import axios from "axios";
-import { useState, useEffect } from "react";
-
-import Swal from "sweetalert2";
-
-interface Tp {
-  id: number;
-  barcode: string;
-  name: string;
-  price: number;
-  quantity: number;
-  disabled: boolean;
-}
-interface Tb {
-  key: number;
-  id: number;
-  name: string;
-  price: number;
-  count: number;
-}
-
-function sellproduct() {
+import { useEffect, useState } from "react";
+import { data_sell, Table_sell } from "../../interface/sellproduct";
+import { GetProdectALL, PostOrder } from "../../router/SellProduct";
+import type { RadioChangeEvent } from "antd";
+function Sellproduct() {
   const [formss] = useForm();
-  const [tableData, setTableData] = useState<Tb[]>([]);
-  const [maxnum, setmaxnum] = useState<number>(0);
-  const [data, setdata] = useState<Tp[]>([]);
-
+  const [tableData, setTableData] = useState<Table_sell[]>([]);
+  const [data, setdata] = useState<data_sell[]>([]);
+  const [value, setValue] = useState(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const featchdata = async () => {
+    const response = await GetProdectALL();
+    setdata(response);
+  };
   useEffect(() => {
-    axios
-      .get("http://localhost:5001/api/showitem")
-      .then((res) => {
-        setdata(
-          res.data.map((result: Tp) => ({
-            value: result.id,
-            label: result.name,
-            id: result.id,
-            barcode: result.barcode,
-            name: result.name,
-            price: result.price,
-            quantity: result.quantity,
-            disabled: false,
-          }))
-        );
-      })
-      .catch((err) => {
-        console.log("Error : ", err);
-      });
-  }, [data]);
+    featchdata();
+  }, []);
+  const onChange = (e: RadioChangeEvent) => {
+    console.log(e.target.value);
+    setValue(e.target.value);
+  };
   const onFinish: FormProps["onFinish"] = (values) => {
-    console.log(values);
-    const itemfinded = data.filter((iitem) => iitem.id === values.id);
-    setTableData([
-      ...tableData,
-      {
-        id: itemfinded[0].id,
-        name: itemfinded[0].name,
-        price: itemfinded[0].price,
-        count: values.number,
-        key:
-          tableData.length === 0 ? 0 : tableData[tableData.length - 1].key + 1,
-      },
-    ]);
-    const updatedata: Tp[] = data
-      .map((i) => {
-        if (i.id === values.id) {
-          return { ...i, quantity: i.quantity - values.number }; // ลด quantity
-        }
-        return i;
-      })
-      .map((i) => {
-        // ตั้งค่า disabled ถ้า quantity น้อยกว่า 1
-        return i.quantity < 1 ? { ...i, disabled: true } : i;
+    const itemfinded = data.filter((iitem) => iitem.barcode === values.barcode);
+
+    if (itemfinded.length === 0) {
+      notification.error({
+        message: "ข้อผิดพลาด",
+        description: "ไม่พบ bar code นี้",
       });
-    setdata(updatedata);
+      formss.resetFields();
+      return;
+    }
+
+    const existingIndex = tableData.findIndex(
+      (item) => item.name === itemfinded[0].name
+    );
+
+    if (existingIndex >= 0) {
+      const updatedTableData = [...tableData];
+      updatedTableData[existingIndex].count += values.quantity;
+      updatedTableData[existingIndex].sum +=
+        values.quantity * updatedTableData[existingIndex].price;
+
+      setTableData(updatedTableData);
+      notification.success({
+        message: "สำเร็จ",
+        description: "อัปเดตรายการสำเร็จ",
+      });
+    } else {
+      setTableData([
+        ...tableData,
+        {
+          id: itemfinded[0].id,
+          name: itemfinded[0].name,
+          price: itemfinded[0].price,
+          count: values.quantity,
+          key:
+            tableData.length === 0
+              ? 0
+              : tableData[tableData.length - 1].key + 1,
+          sum: itemfinded[0].price * values.quantity,
+        },
+      ]);
+      notification.success({
+        message: "สำเร็จ",
+        description: "เพิ่มรายการสำเร็จ",
+      });
+    }
 
     formss.resetFields();
   };
-  const columns: TableProps["columns"] = [
+  const confirm = (record: Table_sell) => {
+    const new_data = tableData.filter((data) => data.key !== record.key);
+    console.log(new_data);
+    setTableData(new_data);
+    notification.warning({
+      message: "ลบสำเร็จ",
+      description: "ระบบได้ลบ " + record.name,
+    });
+  };
+  const columns: TableProps<Table_sell>["columns"] = [
     { title: "name", dataIndex: "name", key: "name" },
     { title: "price", dataIndex: "price", key: "price" },
     { title: "quantity", dataIndex: "count", key: "count" },
+    { title: "sum", dataIndex: "sum", key: "sum" },
     {
       title: "รายละเอียด",
       key: "info",
-      render: (_, record) => (
+      render: (_, record: Table_sell) => (
         <Space size="middle">
-          <Button
-            danger
-            onClick={() => {
-              console.log(record.id);
-              Swal.fire({
-                title: "Are you sure?",
-                text: "You won't be able to revert this!",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Yes, delete it!",
-              }).then((result) => {
-                const passdata = data
-                  .map((i) => {
-                    if (i.id === record.id) {
-                      return { ...i, quantity: i.quantity + record.count }; // ลด quantity
-                    }
-                    return i;
-                  })
-                  .map((i) => {
-                    // ตั้งค่า disabled ถ้า quantity น้อยกว่า 1
-                    return i.quantity > 0 ? { ...i, disabled: false } : i;
-                  });
-                  setdata(passdata)
-                if (result.isConfirmed) {
-                  const new_data = tableData.filter(
-                    (data) => data.key !== record.key
-                  );
-                  console.log(new_data);
-                  setTableData(new_data);
-                  Swal.fire({
-                    title: "Deleted!",
-                    text: "Your file has been deleted.",
-                    icon: "success",
-                  });
-                }
-              });
-            }}
+          <Popconfirm
+            title="ลบสินค้า"
+            description="คุณเเน่ใช้ไหมว่าต้องการลบสินค้าชิ้นนี้?"
+            onConfirm={() => confirm(record)}
+            okText="Yes"
+            cancelText="No"
           >
-            Delete
-          </Button>
+            <Button danger>Delete</Button>
+          </Popconfirm>
         </Space>
       ),
     },
   ];
 
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleOk = async () => {
+    const response: any = await PostOrder(value, tableData);
+    if (response.status === 200) {
+      setTableData([]);
+      notification.success({
+        message: "สำเร็จ",
+      });
+    }
+    if (response.status != 200) {
+      notification.error({
+        message: "เกิดข้อผิดพลาด",
+      });
+    }
+    setIsModalOpen(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
   return (
     <>
       <Form onFinish={onFinish} form={formss}>
         <div className="md:flex md:justify-center md:space-x-4 md:mx-0 mx-4">
           <Form.Item
-            label="ชื่อสินค้า"
-            name="id"
-            rules={[{ required: true, message: "กรอกชื่อสินค้า" }]}
+            label="Barcode"
+            name="barcode"
+            rules={[{ required: true, message: "กรุณากรอก Bar code" }]}
           >
-            <Select
-              style={{ width: 200 }}
-              allowClear
-              options={data}
-              placeholder="select it"
-              onChange={(value) => {
-                setmaxnum(data.filter((i) => i.id === value)[0].quantity);
-                console.log(maxnum);
-              }}
-            />
-          </Form.Item>
+            <Input />
+          </Form.Item>{" "}
           <Form.Item
             label="จำนวน"
-            name="number"
+            name="quantity"
             style={{ width: 200 }}
-            rules={[
-              { required: true, message: "กรอกจำนวนสินค้า" },
-              {
-                validator: (_, value) =>
-                  value && value <= maxnum
-                    ? Promise.resolve()
-                    : Promise.reject(new Error(`ค่าต้องไม่เกิน ${maxnum}`)),
-              },
-            ]}
+            rules={[{ required: true, message: "กรอกจำนวนสินค้า" }]}
           >
             <InputNumber min={1} className="w-full" />
           </Form.Item>
@@ -177,20 +166,55 @@ function sellproduct() {
           </Form.Item>
         </div>
       </Form>
-      <div className="px-3 sm:px-6 md:mx-auto container">
+      <div className="md:mx-auto container overflow-x-auto">
         <Table columns={columns} dataSource={tableData} rowKey="key" />
       </div>
       <div className="px-3 sm:px-6 md:mx-auto container my-4 justify-end flex space-x-6">
         <p>
-          รวมทั้งหมด{" "}
+          รวมทั้งหมด
           {tableData.reduce((totals, acc) => totals + acc.price * acc.count, 0)}
         </p>
-        <Button disabled={tableData.length < 1} type="primary">
+        <Button
+          disabled={tableData.length < 1}
+          type="primary"
+          onClick={showModal}
+        >
           ยืนยันการซื้อสินค้า
         </Button>
       </div>
+      <Modal
+        title={
+          "รวมราคา " +
+          tableData.reduce((totals, acc) => totals + acc.price * acc.count, 0)
+        }
+        open={isModalOpen}
+        onOk={handleOk}
+        onCancel={handleCancel}
+      >
+        <List
+          dataSource={tableData}
+          renderItem={(tableData) => (
+            <List.Item key={1}>
+              <List.Item.Meta
+                title={<p>ชื่อสินค้า</p>}
+                description={<p>{tableData.name}</p>}
+              />
+
+              <List.Item.Meta
+                title={<p>จำนวนสินค้า</p>}
+                description={<p>{tableData.count}</p>}
+              />
+              <div>{tableData.sum}</div>
+            </List.Item>
+          )}
+        />
+        <Radio.Group onChange={onChange} value={value}>
+          <Radio value={1}>เงินสด</Radio>
+          <Radio value={2}>scan</Radio>
+        </Radio.Group>
+      </Modal>
     </>
   );
 }
 
-export default sellproduct;
+export default Sellproduct;
